@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>LocalSaver</title>
+</head>
+
+<body>
+    <h1>LocalSaver - 投稿掲示板</h1>
+    <form action="/submit" method="post">
+        名前: <input type="text" name="name" /><br />
+        メッセージ: <textarea name="message"></textarea><br />
+        <input type="submit" value="投稿" />
+    </form>
+    <hr />
+    {{range .}}
+    <div><strong>{{.Name}}</strong>: {{.Message}}</div>
+    {{end}}
+</body>
+
+</html>
