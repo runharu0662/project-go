@@ -35,6 +35,11 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 func main() {
     http.HandleFunc("/api/post", handlePost)
 
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/index.html")
+	})
+
+
     localIP := getLocalIP()
     fmt.Printf("Go API running on: http://%s:8080\n", localIP)
 
