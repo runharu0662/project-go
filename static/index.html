@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>掲示板</title>
+</head>
+
+<body>
+    <h1>投稿フォーム</h1>
+    <form id="postForm">
+        名前: <input type="text" name="name" /><br />
+        メッセージ: <textarea name="message"></textarea><br />
+        <input type="submit" value="送信" />
+    </form>
+    <div id="response"></div>
+
+    <script>
+        document
+            .getElementById("postForm")
+            .addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const form = new FormData(e.target);
+                const res = await fetch("/api/post", {
+                    method: "POST",
+                    body: form,
+                });
+                const text = await res.text();
+                document.getElementById("response").textContent = text;
+            });
+    </script>
+</body>
+
+</html>

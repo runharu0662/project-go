@@ -2,39 +2,23 @@ package main
 
 import (
     "fmt"
-    "html/template"
     "net/http"
-    "sync"
 )
 
-type Post struct {
-    Name    string
-    Message string
+func handlePost(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+        return
+    }
+    name := r.FormValue("name")
+    message := r.FormValue("message")
+    fmt.Printf("投稿: %s - %s\n", name, message)
+    w.Write([]byte("投稿を受け付けました"))
 }
 
-var posts []Post
-var mu sync.Mutex
-
 func main() {
-    http.HandleFunc("/", indexHandler)
-    http.HandleFunc("/submit", submitHandler)
-    fmt.Println("Server started at :8080")
+    http.HandleFunc("/api/post", handlePost)
+    fmt.Println("Go API running on :8080")
     http.ListenAndServe(":8080", nil)
 }
 
-// コメント見やすくて草
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-    tmpl := template.Must(template.ParseFiles("index.html"))
-    tmpl.Execute(w, posts)
-}
-
-func submitHandler(w http.ResponseWriter, r *http.Request) {
-    if r.Method == http.MethodPost {
-        name := r.FormValue("name")
-        message := r.FormValue("message")
-        mu.Lock()
-        posts = append(posts, Post{Name: name, Message: message})
-        mu.Unlock()
-        http.Redirect(w, r, "/", http.StatusSeeOther)
-    }
-}
