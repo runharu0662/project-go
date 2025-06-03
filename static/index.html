@@ -1,33 +1,31 @@
-<!doctype html>
-<html>
+<ul id="postList"></ul>
 
-<head>
-    <title>掲示板</title>
-</head>
+<script>
+    async function loadPosts() {
+        const res = await fetch("/api/posts");
+        const data = await res.json();
+        const ul = document.getElementById("postList");
+        ul.innerHTML = "";
+        for (const post of data) {
+            const li = document.createElement("li");
+            li.textContent = `${post.name}: ${post.message}`;
+            ul.appendChild(li);
+        }
+    }
 
-<body>
-    <h1>投稿フォーム</h1>
-    <form id="postForm">
-        名前: <input type="text" name="name" /><br />
-        メッセージ: <textarea name="message"></textarea><br />
-        <input type="submit" value="送信" />
-    </form>
-    <div id="response"></div>
-
-    <script>
-        document
-            .getElementById("postForm")
-            .addEventListener("submit", async function (e) {
-                e.preventDefault();
-                const form = new FormData(e.target);
-                const res = await fetch("/api/post", {
-                    method: "POST",
-                    body: form,
-                });
-                const text = await res.text();
-                document.getElementById("response").textContent = text;
+    document
+        .getElementById("postForm")
+        .addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const form = new FormData(e.target);
+            const res = await fetch("/api/post", {
+                method: "POST",
+                body: form,
             });
-    </script>
-</body>
+            const text = await res.text();
+            document.getElementById("response").textContent = text;
+            await loadPosts(); // ← 送信後に投稿一覧を更新
+        });
 
-</html>
+    loadPosts(); // 初期表示
+</script>
