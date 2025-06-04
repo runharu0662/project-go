@@ -3,6 +3,7 @@ package main
 import (
     "encoding/json"
     "net/http"
+	"fmt"
 )
 
 type Post struct {
@@ -16,6 +17,7 @@ var posts = []Post{
 }
 
 func main() {
+	fmt.Println("Server is running on http://localhost:8080")
     http.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         json.NewEncoder(w).Encode(posts)
