@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8" />
@@ -9,9 +9,13 @@
 <body>
     <h1>掲示板(仮)</h1>
     <form id="postForm">
-        名前: <input type="text" name="name" /><br />
-        メッセージ: <textarea name="message"></textarea><br />
-        <input type="submit" value="送信" />
+        <label for="name">名前:</label>
+        <input type="text" id="name" name="name" /><br />
+
+        <label for="message">メッセージ:</label>
+        <textarea id="message" name="message"></textarea><br />
+
+        <input type="submit" value="送信" aria-label="submit post" />
     </form>
 
     <div id="response"></div>
