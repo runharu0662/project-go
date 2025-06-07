@@ -1,49 +1,53 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <title>掲示板(仮)</title>
-  </head>
+</head>
 
-  <body>
+<body>
     <h1>掲示板(仮)</h1>
     <form id="postForm">
-      名前: <input type="text" name="name" /><br />
-      メッセージ: <textarea name="message"></textarea><br />
-      <input type="submit" value="送信" />
+        名前: <input type="text" name="name" /><br />
+        メッセージ: <textarea name="message"></textarea><br />
+        <input type="submit" value="送信" />
     </form>
 
     <div id="response"></div>
     <h2>投稿一覧</h2>
-    <ul id="postList"></ul>
+    <ul id="postList">
+        <li style="display: none">Loading...</li>
+    </ul>
 
     <script>
-      async function loadPosts() {
-        const res = await fetch("/api/posts");
-        const posts = await res.json();
-        const list = document.getElementById("postList");
-        list.innerHTML = "";
-        for (const post of posts) {
-          const li = document.createElement("li");
-          li.textContent = `${post.name}: ${post.message}`;
-          list.appendChild(li);
+        async function loadPosts() {
+            const res = await fetch("/api/posts");
+            const posts = await res.json();
+            const list = document.getElementById("postList");
+            list.innerHTML = "";
+            for (const post of posts) {
+                const li = document.createElement("li");
+                li.textContent = `${post.name}: ${post.message}`;
+                list.appendChild(li);
+            }
         }
-      }
 
-      document
-        .getElementById("postForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-          const form = new FormData(e.target);
-          const res = await fetch("/api/post", {
-            method: "POST",
-            body: form,
-          });
-          document.getElementById("response").textContent = await res.text();
-          await loadPosts();
-        });
+        document
+            .getElementById("postForm")
+            .addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const form = new FormData(e.target);
+                const res = await fetch("/api/post", {
+                    method: "POST",
+                    body: form,
+                });
+                document.getElementById("response").textContent = await res.text();
+                await loadPosts();
+            });
 
-      loadPosts();
+        loadPosts();
     </script>
-  </body>
+</body>
+
 </html>
