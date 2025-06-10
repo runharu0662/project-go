@@ -6,29 +6,29 @@ import (
 	"net/http"
 )
 
-type Post struct {
+type Message struct {
 	Name    string `json:"name"`
 	Message string `json:"message"`
 }
 
-var posts = []Post{
+var messages = []Message{
 	{"Alice", "Hello!"},
 	{"Bob", "Hi!"},
 }
 
 func main() {
-	// cout "Server is running on http://localhost:8080"
 	fmt.Println("Server is running on http://localhost:8080")
-	http.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
+
+	http.HandleFunc("/api/messages", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(posts)
+		json.NewEncoder(w).Encode(messages)
 	})
 
-	http.HandleFunc("/api/post", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/message", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			name := r.FormValue("name")
 			msg := r.FormValue("message")
-			posts = append(posts, Post{name, msg})
+			messages = append(messages, Message{name, msg})
 			w.Write([]byte("OK"))
 		}
 	})

@@ -26,7 +26,7 @@
 
     <script>
         async function loadPosts() {
-            const res = await fetch("/api/posts");
+            const res = await fetch("/api/messages");
             const posts = await res.json();
             const list = document.getElementById("postList");
             list.innerHTML = "";
@@ -42,7 +42,7 @@
             .addEventListener("submit", async function (e) {
                 e.preventDefault();
                 const form = new FormData(e.target);
-                const res = await fetch("/api/post", {
+                const res = await fetch("/api/message", {
                     method: "POST",
                     body: form,
                 });
