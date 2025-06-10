@@ -43,7 +43,7 @@ func main() {
 	r.HandleFunc("/api/logout", LogoutHandler).Methods("POST")
 	r.HandleFunc("/api/me", MeHandler).Methods("GET")
 
-	http.HandleFunc("/api/messages", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/api/messages", func(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Query("SELECT name, message FROM messages ORDER BY id DESC")
 		if err != nil {
 			http.Error(w, err.Error(), 500)
@@ -65,7 +65,7 @@ func main() {
 		json.NewEncoder(w).Encode(messages)
 	})
 
-	http.HandleFunc("/api/message", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/api/message", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			name := r.FormValue("name")
 			msg := r.FormValue("message")

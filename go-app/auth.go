@@ -15,6 +15,14 @@ type User struct {
 	Password string `json:"password"`
 }
 
+func init() {
+	store.Options = &sessions.Options{
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode, // ← Cookie制限を緩和
+	}
+}
+
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var u User
 	json.NewDecoder(r.Body).Decode(&u)
