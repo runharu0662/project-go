@@ -1,86 +1,113 @@
 <!doctype html>
 <html lang="ja">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <title>掲示板</title>
-</head>
+    <style>
+      header {
+        background-color: #f0f0f0;
+        padding: 1em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-<body>
-    <h1>掲示板</h1>
+      #headerLeft h1 {
+        margin: 0;
+      }
 
-    <div id="loginStatus">確認中...</div>
-    <button id="logoutBtn" style="display: none">ログアウト</button>
-    <a href="/login" id="loginLink" style="display: none">ログイン</a>
+      #headerRight > * {
+        margin-left: 1em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div id="headerLeft">
+        <h1>掲示板</h1>
+      </div>
+      <div id="headerRight">
+        <span id="loginStatus">確認中...</span>
+        <button id="logoutBtn" style="display: none">ログアウト</button>
+        <a href="/login" id="loginLink" style="display: none">ログイン</a>
+      </div>
+    </header>
 
     <form id="postForm">
-        <label for="message">メッセージ:</label><br />
-        <textarea id="message" name="message"></textarea><br />
-        <input type="submit" value="送信" aria-label="投稿送信" />
+      <label for="message">メッセージ:</label><br />
+      <textarea id="message" name="message"></textarea><br />
+      <input type="submit" value="送信" aria-label="投稿送信" />
     </form>
 
     <div id="response"></div>
     <h2>投稿一覧</h2>
     <ul id="postList">
-        <li>読み込み中...</li>
+      <li>読み込み中...</li>
     </ul>
 
     <script>
-        let currentUser = null;
+      let currentUser = null;
 
-        async function checkLoginStatus() {
-            const res = await fetch("/api/me");
-            const status = document.getElementById("loginStatus");
-            if (res.ok) {
-                const data = await res.json();
-                currentUser = data.username;
-                status.textContent = `ログイン中: ${data.username}`;
-                document.getElementById("logoutBtn").style.display = "inline";
-            } else {
-                currentUser = null;
-                status.textContent = "未ログイン";
-                document.getElementById("loginLink").style.display = "inline";
-                document.getElementById("postForm").style.display = "none";
-            }
+      async function checkLoginStatus() {
+        const res = await fetch("/api/me", { credentials: "include" });
+        const status = document.getElementById("loginStatus");
+        if (res.ok) {
+          const data = await res.json();
+          currentUser = data.username;
+          status.textContent = `ログイン中: ${data.username}`;
+          document.getElementById("logoutBtn").style.display = "inline";
+          document.getElementById("loginLink").style.display = "none";
+          document.getElementById("postForm").style.display = "block";
+        } else {
+          currentUser = null;
+          status.textContent = "未ログイン";
+          document.getElementById("loginLink").style.display = "inline";
+          document.getElementById("logoutBtn").style.display = "none";
+          document.getElementById("postForm").style.display = "none";
         }
+      }
 
-        document
-            .getElementById("logoutBtn")
-            .addEventListener("click", async () => {
-                await fetch("/api/logout", {method: "POST"});
-                location.reload();
-            });
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", async () => {
+          await fetch("/api/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+          location.reload();
+        });
 
-        document
-            .getElementById("postForm")
-            .addEventListener("submit", async (e) => {
-                e.preventDefault();
-                if (!currentUser) return alert("ログインしてください");
-                const form = new FormData(e.target);
-                form.append("name", currentUser);
-                const res = await fetch("/api/message", {
-                    method: "POST",
-                    body: form,
-                });
-                document.getElementById("response").textContent = await res.text();
-                await loadPosts();
-            });
+      document
+        .getElementById("postForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (!currentUser) return alert("ログインしてください");
+          const form = new FormData(e.target);
+          form.append("name", currentUser);
+          const res = await fetch("/api/message", {
+            method: "POST",
+            body: form,
+            credentials: "include",
+          });
+          document.getElementById("response").textContent = await res.text();
+          await loadPosts();
+        });
 
-        async function loadPosts() {
-            const res = await fetch("/api/messages");
-            const posts = await res.json();
-            const list = document.getElementById("postList");
-            list.innerHTML = "";
-            for (const post of posts) {
-                const li = document.createElement("li");
-                li.textContent = `${post.name}: ${post.message}`;
-                list.appendChild(li);
-            }
+      async function loadPosts() {
+        const res = await fetch("/api/messages");
+        const posts = await res.json();
+        const list = document.getElementById("postList");
+        list.innerHTML = "";
+        for (const post of posts) {
+          const li = document.createElement("li");
+          li.textContent = `${post.name}: ${post.message}`;
+          list.appendChild(li);
         }
+      }
 
-        checkLoginStatus();
-        loadPosts();
+      checkLoginStatus();
+      loadPosts();
     </script>
-</body>
-
+  </body>
 </html>
