@@ -3,28 +3,69 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>掲示板(仮)</title>
+    <title>掲示板</title>
 </head>
 
 <body>
-    <h1>掲示板(仮)</h1>
+    <h1>掲示板</h1>
+
+    <div id="loginStatus">確認中...</div>
+    <button id="logoutBtn" style="display: none">ログアウト</button>
+    <a href="/login" id="loginLink" style="display: none">ログイン</a>
+
     <form id="postForm">
-        <label for="name">名前:</label>
-        <input type="text" id="name" name="name" /><br />
-
-        <label for="message">メッセージ:</label>
+        <label for="message">メッセージ:</label><br />
         <textarea id="message" name="message"></textarea><br />
-
-        <input type="submit" value="送信" aria-label="submit post" />
+        <input type="submit" value="送信" aria-label="投稿送信" />
     </form>
 
     <div id="response"></div>
     <h2>投稿一覧</h2>
     <ul id="postList">
-        <li style="display: none">Loading...</li>
+        <li>読み込み中...</li>
     </ul>
 
     <script>
+        let currentUser = null;
+
+        async function checkLoginStatus() {
+            const res = await fetch("/api/me");
+            const status = document.getElementById("loginStatus");
+            if (res.ok) {
+                const data = await res.json();
+                currentUser = data.username;
+                status.textContent = `ログイン中: ${data.username}`;
+                document.getElementById("logoutBtn").style.display = "inline";
+            } else {
+                currentUser = null;
+                status.textContent = "未ログイン";
+                document.getElementById("loginLink").style.display = "inline";
+                document.getElementById("postForm").style.display = "none";
+            }
+        }
+
+        document
+            .getElementById("logoutBtn")
+            .addEventListener("click", async () => {
+                await fetch("/api/logout", {method: "POST"});
+                location.reload();
+            });
+
+        document
+            .getElementById("postForm")
+            .addEventListener("submit", async (e) => {
+                e.preventDefault();
+                if (!currentUser) return alert("ログインしてください");
+                const form = new FormData(e.target);
+                form.append("name", currentUser);
+                const res = await fetch("/api/message", {
+                    method: "POST",
+                    body: form,
+                });
+                document.getElementById("response").textContent = await res.text();
+                await loadPosts();
+            });
+
         async function loadPosts() {
             const res = await fetch("/api/messages");
             const posts = await res.json();
@@ -37,19 +78,7 @@
             }
         }
 
-        document
-            .getElementById("postForm")
-            .addEventListener("submit", async function (e) {
-                e.preventDefault();
-                const form = new FormData(e.target);
-                const res = await fetch("/api/message", {
-                    method: "POST",
-                    body: form,
-                });
-                document.getElementById("response").textContent = await res.text();
-                await loadPosts();
-            });
-
+        checkLoginStatus();
         loadPosts();
     </script>
 </body>

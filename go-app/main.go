@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
 
@@ -29,10 +30,18 @@ func initDB() {
 }
 
 func main() {
+	fmt.Println("Server is running")
+
 	initDB()
 	defer db.Close()
 
-	fmt.Println("Server is running on http://localhost:8080")
+	r := mux.NewRouter()
+
+	// authorization routes
+	r.HandleFunc("/api/register", RegisterHandler).Methods("POST")
+	r.HandleFunc("/api/login", LoginHandler).Methods("POST")
+	r.HandleFunc("/api/logout", LogoutHandler).Methods("POST")
+	r.HandleFunc("/api/me", MeHandler).Methods("GET")
 
 	http.HandleFunc("/api/messages", func(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Query("SELECT name, message FROM messages ORDER BY id DESC")
@@ -70,5 +79,5 @@ func main() {
 		}
 	})
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", r)
 }
