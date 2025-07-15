@@ -33,7 +33,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.Exec("INSERT INTO users (username, password_hash) VALUES ($1, $2)", u.Username, string(hash))
+	// ⚠ 脆弱な実装: 文字列連結によるSQLインジェクション可能性あり
+	query := "INSERT INTO users (username, password_hash) VALUES ('" + u.Username + "', '" + string(hash) + "')"
+	_, err = db.Exec(query)
 	if err != nil {
 		http.Error(w, "Username already taken?", 500)
 		return
@@ -47,7 +49,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&u)
 
 	var hashed string
-	err := db.QueryRow("SELECT password_hash FROM users WHERE username=$1", u.Username).Scan(&hashed)
+	// ⚠ 脆弱な実装: 文字列連結によるSQLインジェクション
+	query := "SELECT password_hash FROM users WHERE username='" + u.Username + "'"
+	err := db.QueryRow(query).Scan(&hashed)
 	if err != nil {
 		http.Error(w, "User not found", 400)
 		return
